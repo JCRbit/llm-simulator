@@ -1,0 +1,18 @@
+/* Lab 3: latency timeline and streaming comparison */
+.timeline{margin-top:16px;}
+.tl-row{display:grid;grid-template-columns:120px 1fr 70px;gap:10px;align-items:center;margin-bottom:8px;font-family:var(--mono);font-size:12px;}
+.tl-row .lbl{color:var(--text-dim);}
+.tl-bar-track{height:14px;background:var(--bg-raised);border-radius:3px;overflow:hidden;}
+.tl-bar{height:100%;width:0%;transition:width .5s ease;}
+.tl-row .ms{color:var(--text);text-align:right;}
+.tl-total{display:flex;justify-content:space-between;font-family:var(--mono);font-size:13px;color:var(--text);border-top:1px solid var(--border);padding-top:10px;margin-top:6px;font-weight:600;}
+.tl-total .v{color:var(--teal);}
+
+.stream-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px;}
+.stream-col{background:var(--bg-raised);border:1px solid var(--border);border-radius:6px;padding:14px;min-height:120px;display:flex;flex-direction:column;}
+.stream-col h4{margin:0 0 10px;font-family:var(--mono);font-size:11px;color:var(--text-faint);letter-spacing:0.04em;}
+.stream-text{font-family:var(--mono);font-size:13px;color:var(--text);min-height:40px;}
+.stream-time{margin-top:auto;padding-top:10px;font-family:var(--mono);font-size:11px;color:var(--text-dim);}
+.stream-time .v{color:var(--teal);}
+
+@media(max-width:640px){.stream-cols{grid-template-columns:1fr;}}

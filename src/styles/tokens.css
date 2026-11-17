@@ -1,0 +1,23 @@
+/* Design tokens */
+:root{
+  --bg:#0f172a;
+  --bg-panel:#1e293b;
+  --bg-panel-alt:#1a2436;
+  --bg-raised:#243146;
+  --border:#334155;
+  --border-soft:#1e293b;
+  --text:#f1f5f9;
+  --text-dim:#94a3b8;
+  --text-faint:#64748b;
+  --teal:#2dd4bf;
+  --teal-soft:#134e4a;
+  --amber:#fbbf24;
+  --amber-soft:#453410;
+  --red:#f87171;
+  --red-soft:#450a0a;
+  --violet:#a78bfa;
+  --violet-soft:#2e1065;
+  --green:#4ade80;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --sans: 'Inter', system-ui, sans-serif;
+}
