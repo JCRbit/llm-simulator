@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Interactive playground for learning LLM token usage, inference cost, latency and límites de uso.">
+<meta name="theme-color" content="#0f172a">
+<title>LLM Simulator</title>
+<link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./src/styles/tokens.css">
+<link rel="stylesheet" href="./src/styles/base.css">
+<link rel="stylesheet" href="./src/styles/layout.css">
+<link rel="stylesheet" href="./src/styles/components.css">
+<link rel="stylesheet" href="./src/styles/lab-latency.css">
+<link rel="stylesheet" href="./src/styles/lab-limits.css">
+<link rel="stylesheet" href="./src/styles/theory.css">
+<link rel="stylesheet" href="./src/styles/lab-challenge.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand"><b>LLM</b> SIMULATOR</div>
+    <nav class="tabs" aria-label="Lab sections">
+      <a href="#lab1" data-i18n="nav.tokens">01 Tokens</a>
+      <a href="#lab2" data-i18n="nav.costs">02 Costes</a>
+      <a href="#lab3" data-i18n="nav.latency">03 Latencia</a>
+      <a href="#lab4" data-i18n="nav.limits">04 Límites</a>
+      <a href="#lab5" data-i18n="nav.challenge">05 Reto</a>
+    </nav>
+    <div class="lang-switch" role="group" aria-label="Language / Idioma">
+      <button type="button" class="lang-btn" id="langEs" aria-pressed="true">ES</button>
+      <button type="button" class="lang-btn" id="langEn" aria-pressed="false">EN</button>
+    </div>
+  </div>
+  <div class="status-bar" id="statusBar" aria-live="polite">
+    <div class="status-cell">
+      <div class="status-label" data-i18n="status.tokens">Tokens</div>
+      <div class="status-value" id="statTokens">0 tokens</div>
+      <div class="status-delta" id="statTokensDelta">—</div>
+    </div>
+    <div class="status-cell">
+      <div class="status-label" data-i18n="status.cost">Coste / petición</div>
+      <div class="status-value" id="statCost">0.0000 $</div>
+      <div class="status-delta" id="statCostDelta">—</div>
+    </div>
+    <div class="status-cell">
+      <div class="status-label" data-i18n="status.latency">Latencia</div>
+      <div class="status-value" id="statLatency">0.00 s</div>
+      <div class="status-delta" id="statLatencyDelta">—</div>
+    </div>
+    <div class="status-cell">
+      <div class="status-label" data-i18n="status.rate">Límite de uso</div>
+      <div class="status-value" id="statRate">0%</div>
+      <div class="status-delta" id="statRateDelta">—</div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section class="hero" id="heroIntro">
+    <p class="eyebrow" data-i18n="hero.eyebrow"></p>
+    <h1 data-i18n="hero.title">Experimentos interactivos sobre las restricciones de producción de los LLM.</h1>
+    <p data-i18n="hero.desc">Los tokens, el coste, la latencia y los <em>límites de uso</em> varían de forma directa según la estructura de la petición. Los siguientes laboratorios son <strong>simulaciones interactivas creadas para aproximarse al comportamiento real de la infraestructura de LLMs</strong>. Aunque están calibrados para ser lo más realistas posible, representan modelos de estimación. Modifica los controles de entrada y observa cómo evoluciona cada métrica en tiempo real.</p>
+    
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="n">05</div><div class="l" data-i18n="hero.stat1">LABORATORIOS</div></div>
+      <div class="hero-stat"><div class="n">11</div><div class="l" data-i18n="hero.stat2">EXPERIMENTOS</div></div>
+    </div>
+  </section>
+
+  <!-- ===================== LAB 1 — TOKEN ANATOMY ===================== -->
+  <section class="lab" id="lab1">
+    <div class="lab-head">
+      <p class="lab-kicker" data-i18n="lab1.kicker">LABORATORIO 01</p>
+      <h2 data-i18n="lab1.title">Anatomía de los tokens</h2>
+      <p data-i18n="lab1.desc">Descubre cómo decisiones de implementación —longitud del texto, historial de chat, contexto recuperado— cambian el consumo de tokens antes de que el modelo genere una sola palabra.</p>
+    </div>
+
+    <div class="theory">
+      <p class="theory-tag" data-i18n="lab1.theory.tag">TEORÍA / fundamentos</p>
+      <h3 data-i18n="lab1.theory.h3">¿Qué es un token y por qué importa?</h3>
+      <div data-i18n="lab1.theory.body">Cargando…</div>
+    </div>
+
+    <div class="experiment">
+      <p class="experiment-title"><span data-i18n="lab1.exp1.tag">EXPERIMENTO 1 / ventana de contexto</span></p>
+      <h3 data-i18n="lab1.exp1.h3">Escribe algo y obsérvalo convertirse en tokens</h3>
+      <label class="visually-hidden" for="tokIn" data-i18n="lab1.exp1.h3">Escribe algo y obsérvalo convertirse en tokens</label>
+      <div class="field">
+        <textarea class="token-input" id="tokIn" data-i18n-placeholder="lab1.exp1.placeholder" placeholder="Explica cómo funciona un límite de uso de una API...">Explica cómo funciona un límite de uso de una API y por qué importa en los sistemas de producción.</textarea>
+      </div>
+      <div id="tokStrip" class="token-highlight" aria-live="off"></div>
+      <div class="readout">
+        <span><span data-i18n="lab1.exp1.tokCount">Tokens (aprox.)</span> <span class="v" id="tokCount">0</span></span>
+        <span><span data-i18n="lab1.exp1.charsPerToken">Caracteres/token</span> <span class="v" id="charsPerToken">0</span></span>
+        <span><span data-i18n="lab1.exp1.charCount">Caracteres</span> <span class="v" id="charCount">0</span></span>
+      </div>
+      <div class="field" style="margin-top:14px;">
+        <div class="field-label"><span data-i18n="lab1.exp1.ctxUsage">Uso de contexto (máx. 4096)</span><span class="val" id="ctxPct">0%</span></div>
+        <div class="meter"><div class="meter-fill" id="ctxMeter" style="width:0%"></div></div>
+      </div>
+      <div class="lesson">
+        <p class="lesson-tag" data-i18n="common.lessonTag">EXPLICACIÓN</p>
+        <p data-i18n="lab1.exp1.lesson">La tokenización no es contar palabras. La puntuación, los espacios y las palabras largas o poco frecuentes suelen dividirse en varias piezas — este cuadro de texto usa una aproximación visual simplificada, pero el principio se cumple en cualquier tokenizador de producción.</p>
+      </div>
+    </div>
+
+    <div class="experiment">
+      <p class="experiment-title"><span data-i18n="lab1.exp2.tag">EXPERIMENTO 2 / desbordamiento de contexto</span></p>
+      <h3 data-i18n="lab1.exp2.h3">Qué ocurre cuando una conversación supera la ventana de contexto</h3>
+      <div class="field">
+        <div class="field-label"><span id="convLenText" data-i18n="lab1.exp2.convLen">Longitud de la conversación</span><span class="val" id="convLenLbl">2.000 tokens</span></div>
+        <label class="visually-hidden" for="convLen" data-i18n="lab1.exp2.convLen">Longitud de la conversación</label>
+        <input type="range" id="convLen" min="500" max="6000" step="100" value="2000">
+      </div>
+      <div id="convStrip" class="token-strip" style="gap:2px;"></div>
+      <div class="readout">
+        <span><span data-i18n="lab1.exp2.ctxWindow">Ventana de contexto</span> <span class="v" id="convReadout">0 / 4.096</span></span>
+      </div>
+      <div class="meter"><div class="meter-fill" id="convMeter" style="width:0%"></div></div>
+      <div id="convAlert"></div>
+
+      <div class="field" style="margin-top:18px;">
+        <div class="field-label"><span data-i18n="lab1.exp2.overflowQ">¿Cómo deberíamos gestionar el desbordamiento?</span></div>
+        <div class="choice-row" id="strategyRow" role="group" aria-label="Overflow strategy">
+          <button type="button" class="choice" data-s="truncate" aria-pressed="true" data-i18n="lab1.exp2.choices.truncate">Truncar</button>
+          <button type="button" class="choice" data-s="sliding" aria-pressed="false" data-i18n="lab1.exp2.choices.sliding">Ventana móvil</button>
+          <button type="button" class="choice" data-s="summarize" aria-pressed="false" data-i18n="lab1.exp2.choices.summarize">Resumir</button>
+          <button type="button" class="choice" data-s="retrieve" aria-pressed="false" data-i18n="lab1.exp2.choices.retrieve">Recuperar relevante</button>
+        </div>
+      </div>
+      <div class="lesson">
+        <p class="lesson-tag" data-i18n="common.lessonTag">EXPLICACIÓN</p>
+        <p id="strategyLesson">Truncar simplemente elimina las interacciones más antiguss. Es gratis e instantáneo, pero el modelo olvida en silencio el inicio de la conversación — incluyendo cualquier cosa importante que el usuario dijera al principio.</p>
+      </div>
+    </div>
+    <div class="experiment">
+      <p class="experiment-title"><span data-i18n="lab1.exp3.tag">EXPERIMENTO 3 / densidad por idioma</span></p>
+      <h3 data-i18n="lab1.exp3.h3">La misma idea, dos idiomas: ¿cuántos tokens gastas?</h3>
+      <div class="controls-grid">
+        <div class="field">
+          <div class="field-label"><span data-i18n="lab1.exp3.labelEs">Español</span></div>
+          <label class="visually-hidden" for="densEs" data-i18n="lab1.exp3.labelEs">Español</label>
+          <textarea class="token-input" id="densEs" rows="3">El control de latencia es crítico para la experiencia de usuario</textarea>
+          <div id="densEsStrip" class="token-highlight" style="margin-top:10px;" aria-live="off"></div>
+          <div class="readout"><span><span class="v" id="densEsCount">0</span> <span data-i18n="lab1.exp3.tokUnit">tokens</span></span></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span data-i18n="lab1.exp3.labelEn">Inglés</span></div>
+          <label class="visually-hidden" for="densEn" data-i18n="lab1.exp3.labelEn">Inglés</label>
+          <textarea class="token-input" id="densEn" rows="3">Latency control is critical for user experience</textarea>
+          <div id="densEnStrip" class="token-highlight" style="margin-top:10px;" aria-live="off"></div>
+          <div class="readout"><span><span class="v" id="densEnCount">0</span> <span data-i18n="lab1.exp3.tokUnit">tokens</span></span></div>
+        </div>
+      </div>
+      <div class="compare-delta" id="densResult"></div>
+      <div class="lesson">
+        <p class="lesson-tag" data-i18n="common.lessonTag">EXPLICACIÓN</p>
+        <p data-i18n="lab1.exp3.lesson">El español (y muchos otros idiomas no ingleses) suele necesitar entre un 20% y un 40% más tokens para expresar la misma idea, porque los vocabularios BPE se entrenan sobre datos donde las palabras y sub-palabras en inglés están sobrerrepresentadas. Los acentos y la "ñ" tienden además a partirse en fragmentos más pequeños, porque aparecen con menos frecuencia en el corpus de entrenamiento.</p>
+      </div>
+    </div>
+
+    <div class="experiment">
+      <p class="experiment-title"><span data-i18n="lab1.exp4.tag">EXPERIMENTO 4 / eficiencia del payload</span></p>
+      <h3 data-i18n="lab1.exp4.h3">JSON frente a Markdown: el mismo dato, distinto coste</h3>
+      <div class="controls-grid">
+        <div class="field">
+          <div class="field-label"><span data-i18n="lab1.exp4.labelJson">JSON</span></div>
+          <label class="visually-hidden" for="payloadJson" data-i18n="lab1.exp4.labelJson">JSON</label>
+          <textarea class="token-input mono" id="payloadJson" rows="10">{
+  "userId": 4821,
+  "name": "Ana",
+  "role": "admin",
+  "active": true,
+  "country": "ES",
+  "plan": "pro",
+  "loginCount": 142,
+  "lastLogin": "2026-09-01",
+  "verified": true,
+  "language": "es"
+}</textarea>
+          <div class="readout"><span><span class="v" id="payloadJsonCount">0</span> <span data-i18n="lab1.exp4.tokUnit">tokens</span></span></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span data-i18n="lab1.exp4.labelMarkdown">Markdown</span></div>
+          <label class="visually-hidden" for="payloadMarkdown" data-i18n="lab1.exp4.labelMarkdown">Markdown</label>
+          <textarea class="token-input mono" id="payloadMarkdown" rows="10">- userId: 4821
+- name: Ana
+- role: admin
+- active: true
+- country: ES
+- plan: pro
+- loginCount: 142
+- lastLogin: 2026-09-01
+- verified: true
+- language: es</textarea>
+          <div class="readout"><span><span class="v" id="payloadMarkdownCount">0</span> <span data-i18n="lab1.exp4.tokUnit">tokens</span></span></div>
+        </div>
+      </div>
+      <div class="compare-delta" id="payloadResult"></div>
+      <div class="lesson">
+        <p class="lesson-tag" data-i18n="common.lessonTag">EXPLICACIÓN</p>
+        <p data-i18n="lab1.exp4.lesson">La puntuación de JSON —llaves, comillas, dos puntos, comas— añade un sobrecoste de tokens oculto en cada petición. A escala, elegir un formato más ligero para datos estructurados puede reducir de forma notable el coste de los tokens de entrada.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== LAB 2 — COST ENGINEERING ===================== -->
+  <section class="lab" id="lab2">
+    <div class="lab-head">
+      <p class="lab-kicker" data-i18n="lab2.kicker">LABORATORIO 02</p>
+      <h2 data-i18n="lab2.title">Ingeniería de costes</h2>
+      <p data-i18n="lab2.desc">Comprende cómo el modelo elegido, el tamaño del contexto y la caché se convierten en una factura de infraestructura — por petición, por día y por mes.</p>
+    </div>
+
+    <div class="theory">
+      <p class="theory-tag" data-i18n="lab2.theory.tag">TEORÍA / precios e infraestructura</p>
+      <h3 data-i18n="lab2.theory.h3">Cómo se factura realmente la inferencia</h3>
+      <div data-i18n="lab2.theory.body">Cargando…</div>
+    </div>
+
+    <div class="experiment">
+      <p class="experiment-title"><span data-i18n="lab2.exp1.tag">EXPERIMENTO 1 / coste por petición</span></p>
+      <h3 data-i18n="lab2.exp1.h3">Calcula el precio de una petición</h3>
+      <div class="controls-grid">
+        <div class="field">
+          <div class="field-label"><span data-i18n="lab2.exp1.model">Modelo</span></div>
+          <label class="visually-hidden" for="modelSel" data-i18n="lab2.exp1.model">Modelo</label>
+          <select id="modelSel">
+            <option value="small" data-i18n="lab2.exp1.models.small">Nova Small — $0.0005 / $0.0015 por 1K</option>
+            <option value="base" selected data-i18n="lab2.exp1.models.base">Nova Base — $0.0030 / $0.0060 por 1K</option>
+            <option value="large" data-i18n="lab2.exp1.models.large">Nova Large — $0.0100 / $0.0300 por 1K</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="field-label"><span data-i18n="lab2.exp1.reqDay">Peticiones / día</span><span class="val" id="reqDayLbl">100.000</span></div>
+          <label class="visually-hidden" for="reqDay" data-i18n="lab2.exp1.reqDay">Peticiones / día</label>
+          <input type="range" id="reqDay" min="1000" max="1000000" step="1000" value="100000">
+        </div>
+        <div class="field">
+          <div class="field-label"><span data-i18n="lab2.exp1.inTok">Tokens de entrada</span><span class="val" id="inTokLbl">2.000</span></div>
+          <label class="visually-hidden" for="inTok" data-i18n="lab2.exp1.inTok">Tokens de entrada</label>
+          <input type="range" id="inTok" min="100" max="8000" step="100" value="2000">
+        </div>
+        <div class="field">
+          <div class="field-label"><span data-i18n="lab2.exp1.outTok">Tokens de salida</span><span class="val" id="outTokLbl">500</span></div>
+          <label class="visually-hidden" for="outTok" data-i18n="lab2.exp1.outTok">Tokens de salida</label>
+          <input type="range" id="outTok" min="50" max="2000" step="50" value="500">
+        </div>
+      </div>
+
+      <div class="result-block">
+        <div class="result-line"><span data-i18n="lab2.exp1.input">Entrada</span><span class="v" id="costInput">$0.000</span></div>
+        <div class="result-line"><span data-i18n="lab2.exp1.output">Salida</span><span class="v" id="costOutput">$0.000</span></div>
+        <div class="result-line total"><span data-i18n="lab2.exp1.request">Petición</span><span class="v" id="costTotal">$0.000</span></div>
+      </div>
+      <div class="result-block">
+        <div class="result-line"><span data-i18n="lab2.exp1.daily">Diario</span><span class="v" id="costDaily">$0.00</span></div>
+        <div class="result-line total"><span data-i18n="lab2.exp1.monthly">Mensual</span><span class="v" id="costMonthly">$0.00</span></div>
+      </div>
+
+      <div class="lesson">
+        <p class="lesson-tag" data-i18n="common.lessonTag">EXPLICACIÓN</p>
+        <p data-i18n="lab2.exp1.lesson">Cada token del contexto tiene un coste, no solo los que genera el modelo. Las conversaciones largas, los system prompts verbosos y los documentos recuperados innecesarios pueden dominar silenciosamente la factura aunque la respuesta final sea una sola frase.</p>
+      </div>
+    </div>
+
+    <div class="experiment">
+      <p class="experiment-title"><span data-i18n="lab2.exp2.tag">EXPERIMENTO 2 / optimizar la petición</span></p>
+      <h3 data-i18n="lab2.exp2.h3">La misma aplicación, distinta ingeniería</h3>
+      <p style="color:var(--text-dim);font-size:14px;margin-top:-6px;" data-i18n="lab2.exp2.sub">Un bot de soporte respondiendo la misma pregunta, diseñado de dos formas distintas.</p>
+      <div class="compare">
+        <div class="compare-col">
+          <h4 data-i18n="lab2.exp2.before">ANTES</h4>
+          <div class="compare-row"><span data-i18n="lab2.exp2.context">Contexto</span><span class="v">4.000 tok</span></div>
+          <div class="compare-row"><span data-i18n="lab2.exp2.output">Salida</span><span class="v">800 tok</span></div>
+          <div class="compare-row"><span data-i18n="lab2.exp2.caching">Caché</span><span class="v" data-i18n="common.off">DESACTIVADA</span></div>
+          <div class="compare-row"><span data-i18n="lab2.exp2.model">Modelo</span><span class="v">Nova Large</span></div>
+          <div class="compare-row" style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;"><span data-i18n="lab2.exp2.costReq">Coste / petición</span><span class="v">$0.082</span></div>
+        </div>
+        <div class="compare-col after">
+          <h4 data-i18n="lab2.exp2.after">DESPUÉS</h4>
+          <div class="compare-row"><span data-i18n="lab2.exp2.context">Contexto</span><span class="v">1.500 tok</span></div>
+          <div class="compare-row"><span data-i18n="lab2.exp2.output">Salida</span><span class="v">400 tok</span></div>
+          <div class="compare-row"><span data-i18n="lab2.exp2.caching">Caché</span><span class="v" data-i18n="common.on">ACTIVADA</span></div>
+          <div class="compare-row"><span data-i18n="lab2.exp2.model">Modelo</span><span class="v">Nova Small</span></div>
+          <div class="compare-row" style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;"><span data-i18n="lab2.exp2.costReq">Coste / petición</span><span class="v">$0.0213</span></div>
+        </div>
+      </div>
+      <div class="compare-delta" data-i18n="lab2.exp2.delta">↓ 74% por petición, misma tarea</div>
+      <div class="lesson">
+        <p class="lesson-tag" data-i18n="common.lessonTag">EXPLICACIÓN</p>
+        <p data-i18n="lab2.exp2.lesson">Recortar el system prompt, cachear contexto repetido, limitar la longitud de salida y enrutar consultas simples a un modelo más pequeño se combinan — cada cambio es modesto, pero juntos reducen el coste en tres cuartas partes sin cambiar lo que ve el usuario.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== LAB 3 — LATENCY CONTROL ===================== -->
+  <section class="lab" id="lab3">
+    <div class="lab-head">
+      <p class="lab-kicker" data-i18n="lab3.kicker">LABORATORIO 03</p>
+      <h2 data-i18n="lab3.title">Control de latencia</h2>
+      <p data-i18n="lab3.desc">La latencia no es un único número. Divide una petición en etapas medibles antes de decidir qué optimizar.</p>
+    </div>
+
+    <div class="theory">
+      <p class="theory-tag" data-i18n="lab3.theory.tag">TEORÍA / métricas de rendimiento</p>
+      <h3 data-i18n="lab3.theory.h3">TTFT, TPOT y la latencia total</h3>
+      <div data-i18n="lab3.theory.body">Cargando…</div>
+    </div>
+
+    <div class="experiment">
+      <p class="experiment-title"><span data-i18n="lab3.exp1.tag">EXPERIMENTO 1 / desglose de la petición</span></p>
+      <h3 data-i18n="lab3.exp1.h3">Envía una petición y observa en qué se va el tiempo</h3>
+      <div class="btn-row btn-left">
+        <button class="btn" id="sendReqBtn" data-i18n="lab3.exp1.sendBtn">Enviar petición</button>
+      </div>
+      <div class="timeline" id="timelineBlock" style="display:none;">
+        <div class="tl-row"><span class="lbl" data-i18n="lab3.exp1.network">Red</span><div class="tl-bar-track"><div class="tl-bar" id="bar-network" style="background:var(--text-faint)"></div></div><span class="ms" id="ms-network">–</span></div>
+        <div class="tl-row"><span class="lbl" data-i18n="lab3.exp1.retrieval">Recuperación</span><div class="tl-bar-track"><div class="tl-bar" id="bar-retrieval" style="background:#5b7fb0"></div></div><span class="ms" id="ms-retrieval">–</span></div>
+        <div class="tl-row"><span class="lbl">TTFT</span><div class="tl-bar-track"><div class="tl-bar" id="bar-ttft" style="background:var(--amber)"></div></div><span class="ms" id="ms-ttft">–</span></div>
+        <div class="tl-row"><span class="lbl" data-i18n="lab3.exp1.generation">Generación</span><div class="tl-bar-track"><div class="tl-bar" id="bar-generation" style="background:var(--teal)"></div></div><span class="ms" id="ms-generation">–</span></div>
+        <div class="tl-total"><span data-i18n="lab3.exp1.total">TOTAL</span><span class="v" id="ms-total">–</span></div>
+      </div>
+      <div class="readout" id="latencyExtra" style="display:none;margin-top:14px;">
+        <span>TTFT <span class="v" id="ttftReadout">–</span></span>
+        <span>TPOT <span class="v" id="tpotReadout">–</span></span>
+        <span><span data-i18n="lab3.exp1.output">Salida</span> <span class="v" id="outReadout">–</span></span>
+      </div>
+      <div class="lesson">
+        <p class="lesson-tag" data-i18n="common.lessonTag">EXPLICACIÓN</p>
+        <p data-i18n="lab3.exp1.lesson">Latencia suele esconder cuatro cuellos de botella distintos: el viaje de red, la recuperación o las llamadas a herramientas, el tiempo hasta el primer token y la velocidad bruta de generación. Optimizar la etapa equivocada desperdicia esfuerzo de ingeniería.</p>
+      </div>
+    </div>
+
+    <div class="experiment">
+      <p class="experiment-title"><span data-i18n="lab3.exp2.tag">EXPERIMENTO 2 / streaming frente a blocking</span></p>
+      <h3 data-i18n="lab3.exp2.h3">Dos formas de entregar la misma respuesta</h3>
+      <div class="btn-row btn-left">
+        <button class="btn" id="streamBtn" data-i18n="lab3.exp2.runBtn">Simular</button>
+      </div>
+      <div class="stream-cols">
+        <div class="stream-col">
+          <h4 data-i18n="lab3.exp2.blocking">BLOCKING</h4>
+          <div class="stream-text" id="blockText"></div>
+          <div class="stream-time"><span data-i18n="lab3.exp2.responseAfter">Respuesta tras</span> <span class="v" id="blockTime">–</span></div>
+        </div>
+        <div class="stream-col">
+          <h4 data-i18n="lab3.exp2.streaming">STREAMING</h4>
+          <div class="stream-text" id="streamText"></div>
+          <div class="stream-time"><span data-i18n="lab3.exp2.firstAfter">Primeros tokens tras</span> <span class="v" id="streamTime">–</span></div>
+        </div>
+      </div>
+      <div class="lesson">
+        <p class="lesson-tag" data-i18n="common.lessonTag">EXPLICACIÓN</p>
+        <p data-i18n="lab3.exp2.lesson">El streaming permite que el cliente comience a mostrar la respuesta tan pronto como el primer token está listo, en lugar de esperar a que el modelo termine de generar cada token antes de que aparezca algo en pantalla. Es por esto que una interfaz de chat se siente instantánea incluso cuando la respuesta completa tarda varios segundos en finalizar.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== LAB 4 — LÍMITES DE USO ===================== -->
+  <section class="lab" id="lab4">
+    <div class="lab-head">
+      <p class="lab-kicker" data-i18n="lab4.kicker">LABORATORIO 04</p>
+      <h2 data-i18n="lab4.title">Límites de uso</h2>
+      <p data-i18n="lab4.desc">Observa qué ocurre cuando el tráfico supera la capacidad de un endpoint, y cómo cambia el resultado según la estrategia de reintentos.</p>
+    </div>
+
+    <div class="theory">
+      <p class="theory-tag" data-i18n="lab4.theory.tag">TEORÍA / cuotas de la API</p>
+      <h3 data-i18n="lab4.theory.h3">RPM, TPM, TPD y el error 429</h3>
+      <div data-i18n="lab4.theory.body">Cargando…</div>
+    </div>
+
+    <div class="experiment">
+      <p class="experiment-title"><span data-i18n="lab4.exp1.tag">EXPERIMENTO 1 / tráfico frente a capacidad</span></p>
+      <h3 data-i18n="lab4.exp1.h3">Aumenta el tráfico contra un límite fijo</h3>
+      <div class="controls-grid">
+        <div class="field">
+          <div class="field-label"><span data-i18n="lab4.exp1.traffic">Tráfico</span><span class="val" id="trafficLbl">850 RPM</span></div>
+          <label class="visually-hidden" for="trafficSlider" data-i18n="lab4.exp1.traffic">Tráfico</label>
+          <input type="range" id="trafficSlider" min="0" max="2000" step="10" value="850">
+        </div>
+        <div class="field">
+          <div class="field-label"><span data-i18n="lab4.exp1.limit">Límite</span><span class="val" id="limitLbl">1.000 RPM</span></div>
+          <label class="visually-hidden" for="limitSlider" data-i18n="lab4.exp1.limit">Límite</label>
+          <input type="range" id="limitSlider" min="200" max="2000" step="10" value="1000">
+        </div>
+      </div>
+      <div class="bars" id="barsHolder"></div>
+      <div id="rateAlert"></div>
+      <div class="lesson">
+        <p class="lesson-tag" data-i18n="common.lessonTag">EXPLICACIÓN</p>
+        <p data-i18n="lab4.exp1.lesson">Un límite de uso protege la infraestructura del proveedor, no la tuya. En cuanto el tráfico lo supera, cada petición adicional falla con un 429 — el sistema no se ralentiza con elegancia, empieza a rechazar directamente.</p>
+      </div>
+    </div>
+
+    <div class="experiment">
+      <p class="experiment-title"><span data-i18n="lab4.exp2.tag">EXPERIMENTO 2 / estrategia de reintentos</span></p>
+      <h3 data-i18n="lab4.exp2.h3">¿Qué deberíamos hacer ante un error HTTP 429 Too Many Requests?</h3>
+      <div class="choice-row" id="retryRow" role="group" aria-label="Retry strategy">
+        <button type="button" class="choice" data-r="immediate" aria-pressed="true" data-i18n="lab4.exp2.choices.immediate">Reintento inmediato</button>
+        <button type="button" class="choice" data-r="backoff" aria-pressed="false" data-i18n="lab4.exp2.choices.backoff">Backoff exponencial</button>
+        <button type="button" class="choice" data-r="jitter" aria-pressed="false" data-i18n="lab4.exp2.choices.jitter">Backoff + jitter</button>
+        <button type="button" class="choice" data-r="queue" aria-pressed="false" data-i18n="lab4.exp2.choices.queue">Cola</button>
+        <button type="button" class="choice" data-r="fallback" aria-pressed="false" data-i18n="lab4.exp2.choices.fallback">Fallback</button>
+      </div>
+      <div class="btn-row btn-left" style="margin-top:12px;">
+        <button class="btn" id="runRetryBtn" data-i18n="lab4.exp2.simulateBtn">Simular</button>
+      </div>
+
+      <div class="req-grid" id="reqGrid" aria-hidden="true"></div>
+      <div class="req-legend">
+        <span><span class="dot" style="background:var(--teal)"></span><span data-i18n="lab4.exp2.legend.success">éxito</span></span>
+        <span><span class="dot" style="background:var(--amber)"></span><span data-i18n="lab4.exp2.legend.queued">en cola</span></span>
+        <span><span class="dot" style="background:var(--red)"></span><span data-i18n="lab4.exp2.legend.failed">fallo (429)</span></span>
+        <span><span class="dot" style="background:var(--violet)"></span><span data-i18n="lab4.exp2.legend.fallback">fallback</span></span>
+      </div>
+
+      <div class="req-summary">
+        <div class="box"><div class="n" id="reqSuccessN">0</div><div class="l" data-i18n="lab4.exp2.summary.succeeded">con éxito</div></div>
+        <div class="box"><div class="n" id="reqFailedN">0</div><div class="l" data-i18n="lab4.exp2.summary.failed">fallidas (429)</div></div>
+        <div class="box"><div class="n" id="reqPendingN">40</div><div class="l" data-i18n="lab4.exp2.summary.pending">pendientes</div></div>
+      </div>
+
+      <div id="retryTimelineWrap" style="display:none;">
+        <div class="retry-timeline" id="retryTimeline"></div>
+        <p class="retry-timeline-label" id="retryTimelineCaption"></p>
+      </div>
+
+      <p class="retry-log" id="retryLog" data-i18n="lab4.exp2.placeholder">Elige una estrategia y ejecuta la simulación.</p>
+
+      <div class="lesson">
+        <p class="lesson-tag" data-i18n="common.lessonTag">EXPLICACIÓN</p>
+        <p id="retryLesson">El reintento inmediato vuelve a enviar tráfico a un endpoint ya saturado con el mismo patrón de peticiones que provocó el 429 en primer lugar — rara vez tiene éxito y puede empeorar la saturación para todos los que comparten el límite.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== LAB 5 — PRODUCTION CHALLENGE ===================== -->
+  <section class="lab" id="lab5">
+    <div class="lab-head">
+      <p class="lab-kicker" data-i18n="lab5.kicker">LABORATORIO 05</p>
+      <h2 data-i18n="lab5.title">Tu LLM acaba de entrar en producción</h2>
+      <p data-i18n="lab5.desc">Un incidente real: diagnostica, toma decisiones y estabiliza el sistema sin romper una métrica para arreglar otra.</p>
+    </div>
+
+    <div class="theory">
+      <p class="theory-tag" data-i18n="lab5.theory.tag">RETO FINAL / producción</p>
+      <h3 data-i18n="lab5.theory.h3">No persigas una métrica perfecta. Construye un sistema estable.</h3>
+      <div data-i18n="lab5.theory.body">Cargando…</div>
+    </div>
+
+    <div class="experiment">
+      <p class="experiment-title"><span data-i18n="lab5.incident.tag">INCIDENTE #001</span></p>
+      <h3 data-i18n="lab5.incident.h3">Tu aplicación acaba de escalar de 5.000 a 100.000 usuarios.</h3>
+      <p class="incident-copy" data-i18n="lab5.incident.copy">Los últimos minutos muestran señales de que el sistema no está listo para producción. Averigua qué ocurre y estabilízalo.</p>
+
+      <div class="incident-board">
+        <div class="incident-head"><span data-i18n="lab5.incident.time">09:00 — PRODUCCIÓN</span><span class="incident-badge" data-i18n="lab5.incident.badge">INCIDENTE ACTIVO</span></div>
+        <div class="incident-metrics" id="incidentMetrics"></div>
+      </div>
+
+      <div class="challenge-progress">
+        <div class="challenge-progress-label"><span data-i18n="lab5.progress">PROGRESO DEL INCIDENTE</span><span id="challengeProgressText">1 / 6</span></div>
+        <div class="meter"><div class="meter-fill" id="challengeProgressMeter" style="width:16.66%"></div></div>
+      </div>
+
+      <div class="challenge-state" id="challengeState">
+        <div class="challenge-step" id="challengeStep">DIAGNÓSTICO</div>
+        <h3 id="challengeQuestion">¿Dónde empezarías a investigar?</h3>
+        <p class="challenge-hint" id="challengeHint">No toques nada todavía. Primero interpreta las señales.</p>
+        <div class="choice-row" id="challengeChoices" role="group" aria-label="Production challenge decision"></div>
+        <div class="diagnostic-panel" id="diagnosticPanel" style="display:none;"></div>
+        <div class="consequence-panel" id="consequencePanel" style="display:none;">
+          <div class="consequence-head"><span data-i18n="lab5.consequence.label">CONSECUENCIAS DE TU DECISIÓN</span><span id="consequenceVerdict"></span></div>
+          <div class="consequence-grid" id="consequenceGrid"></div>
+          <div class="lesson" id="challengeLesson"><p class="lesson-tag" data-i18n="common.lessonTag">EXPLICACIÓN</p><p id="challengeLessonText"></p></div>
+        </div>
+        <div class="btn-row" style="margin-top:18px;"><button type="button" class="btn" id="challengeContinue" disabled data-i18n="lab5.continue">Continuar →</button></div>
+      </div>
+
+      <div class="challenge-live" id="challengeLive" style="display:none;">
+        <div class="live-head"><div class="live-title" data-i18n="lab5.live.title">SISTEMA DE MÉTRICAS</div><span class="incident-badge incident-badge-closed" data-i18n="lab5.live.closed">INCIDENTE CERRADO</span></div>
+        <div class="live-grid" id="liveGrid"></div>
+      </div>
+
+      <div class="final-result" id="challengeFinal" style="display:none;">
+        <p class="experiment-title"><span data-i18n="lab5.finalTag">RESULTADO</span></p>
+        <h3 id="finalHeadline">–</h3>
+        <div class="metric-row"><span class="m-label" data-i18n="lab5.final.model">Modelo</span><span class="m-value" id="finalModel">–</span><span class="m-status">✓</span></div>
+        <div class="metric-row"><span class="m-label" data-i18n="lab5.final.context">Contexto</span><span class="m-value" id="finalContext">–</span><span class="m-status">✓</span></div>
+        <div class="metric-row"><span class="m-label" data-i18n="lab5.final.cache">Prompt caching</span><span class="m-value" id="finalCache">–</span><span class="m-status">✓</span></div>
+        <div class="metric-row"><span class="m-label" data-i18n="lab5.final.rateStrategy">Limitación de uso</span><span class="m-value" id="finalRateStrategy">–</span><span class="m-status">✓</span></div>
+        <div class="metric-row"><span class="m-label" data-i18n="lab5.metricCost">Coste / mes</span><span class="m-value" id="finalCost">–</span><span class="m-status">✓</span></div>
+        <div class="metric-row"><span class="m-label" data-i18n="lab5.metricLatency">Latencia P95</span><span class="m-value" id="finalLatency">–</span><span class="m-status">✓</span></div>
+        <div class="metric-row"><span class="m-label" data-i18n="lab5.metricTPM">Tokens / min</span><span class="m-value" id="finalTPM">–</span><span class="m-status">✓</span></div>
+        <div class="metric-row"><span class="m-label" data-i18n="lab5.metricRate">Tasa 429</span><span class="m-value" id="finalRate">–</span><span class="m-status">✓</span></div>
+        <div class="final-verdict" id="finalVerdict"></div>
+        <div class="lesson" style="margin-top:18px;"><p class="lesson-tag" data-i18n="lab5.whatLearnedTag">¿QUÉ HAS APRENDIDO?</p><div data-i18n="lab5.whatLearned">Cargando…</div></div>
+
+        <div class="bonus-challenge" id="bonusChallenge">
+          <div class="bonus-kicker" data-i18n="lab5.bonus.kicker">BONUS / CAMPAÑA DE MARKETING</div>
+          <h3 data-i18n="lab5.bonus.h3">Ahora rompe tu propia solución.</h3>
+          <p data-i18n="lab5.bonus.copy">Producción lleva 20 minutos estable. Marketing acaba de multiplicar el tráfico ×3. ¿Qué harías ahora?</p>
+          <div class="bonus-stats" id="bonusStats"></div>
+          <div class="choice-row" id="bonusChoices"></div>
+          <div class="lesson" id="bonusResult" style="display:none;"><p class="lesson-tag"><span data-i18n="lab5.bonus.resultTag">RESULTADO</span></p><p id="bonusResultText"></p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot" data-i18n="footer">LLM Lab Simulator</footer>
+</div>
+
+<noscript>Este simulador necesita JavaScript para funcionar. / This simulator requires JavaScript.</noscript>
+<script type="module" src="./src/js/main.js"></script>
+</body>
+</html>
