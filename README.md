@@ -1,6 +1,10 @@
 # LLM Simulator
 
-Herramienta didáctica interactiva sobre las restricciones de producción de los LLM: **tokens, coste de inferencia, latencia y límites de uso**. Cinco laboratorios con 11 experimentos, bilingüe (ES/EN) y sin dependencias: HTML + CSS + JavaScript nativo (ES Modules).
+[![CI & Deploy](https://github.com/JCRbit/llm-simulator/actions/workflows/ci.yml/badge.svg)](https://github.com/JCRbit/llm-simulator/actions/workflows/ci.yml)
+
+🔗 **Demo en vivo: <https://jcrbit.github.io/llm-simulator/>**
+
+Herramienta interactiva sobre las restricciones de producción de los LLM: **tokens, coste de inferencia, latencia y límites de uso**. Cinco laboratorios con 11 experimentos y sin dependencias: HTML + CSS + JavaScript nativo.
 
 | Lab | Contenido |
 |-----|-----------|
@@ -17,6 +21,9 @@ Una barra de estado global muestra, en vivo, las métricas del último experimen
 Solo necesitas **Node.js ≥ 20** para el servidor local, los tests y el build. El proyecto **no tiene dependencias** (no hace falta `npm install`).
 
 ```bash
+git clone https://github.com/JCRbit/llm-simulator.git
+cd llm-simulator
+
 npm run dev      # servidor local → http://localhost:5173
 npm test         # tests unitarios (node:test)
 npm run build    # genera dist/ listo para desplegar
@@ -60,7 +67,3 @@ npm run preview  # sirve dist/ para comprobar el build
 - **Cada laboratorio es un módulo** que exporta `init…Lab()` (registra eventos) y sus funciones `render…()`. Ninguno toca el DOM al importarse, por lo que se pueden importar desde tests.
 - **i18n por diccionarios anidados** resueltos por ruta (`tr('lab1.exp1.defaultText')`). El marcado usa `data-i18n` / `data-i18n-placeholder`; el texto generado desde JS usa `L()`. Los valores con parámetros son funciones. Un test garantiza que `es` y `en` tienen exactamente las mismas claves y que todas las claves usadas en `index.html` existen.
 - **Estado**: el idioma activo vive en `core/i18n.js`; cada laboratorio guarda su propio estado de forma privada. La barra de estado (`core/status.js`) es el único canal compartido entre laboratorios.
-
-
-
-
